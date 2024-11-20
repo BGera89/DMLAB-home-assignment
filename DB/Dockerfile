@@ -11,10 +11,10 @@ RUN apt-get update && apt-get install -y wget \
 WORKDIR /app
 
 # Copy the local script into the container
-COPY init_db.py /app
+COPY . /app
 
 # Install required Python libraries
-RUN pip install sqlalchemy psycopg2-binary
+RUN pip install -r requirements.txt
 
 # Default command to run the initialization script
 CMD ["dockerize", "-wait", "tcp://postgres:5432", "-timeout", "30s", "python", "init_db.py"]

@@ -213,60 +213,41 @@ class WeatherDataProcessor:
         for idx, var in enumerate(variables):
             # Use variable names dynamically
             hourly_data[hourly_variables[idx]] = var
+        df = pd.DataFrame(data=hourly_data)
 
-        return pd.DataFrame(data=hourly_data)
+        return
 
 
 if __name__ == "__main__":
     # Testing and Initialization purposes
+    db_url = "postgresql://postgres:mysecretpassword@localhost:5433/postgres"
     fetcher = WeatherDataFetcher()
 
     country = 'Budapest'
 
-    # daily_weather = fetcher.fetch_daily_weather_data(
-    #     latitude=47.50241297012739,
-    #     longitude=19.04873812789789,
-    #     start_date="2024-06-03",
-    #     end_date="2024-11-17",)
-    # processor = WeatherDataProcessor(response=daily_weather)
+    daily_weather = fetcher.fetch_daily_weather_data(
+        latitude=47.50241297012739,
+        longitude=19.04873812789789,
+        start_date="2024-06-03",
+        end_date="2024-11-17",)
+    processor = WeatherDataProcessor(response=daily_weather)
 
-    # daily_dataframe = processor.process_daily_data()
-    # daily_dataframe['country_name'] = country
-    # daily_dataframe = daily_dataframe[['country_name',
-    #                                    'date',
-    #                                    'temperature_2m_mean',
-    #                                    'rain_sum',
-    #                                    'wind_speed_10m_max',
-    #                                    'shortwave_radiation_sum']]
-    # print(daily_dataframe)
+    daily_dataframe = processor.process_daily_data()
+    daily_dataframe['country_name'] = country
+    daily_dataframe = daily_dataframe[['country_name',
+                                       'date',
+                                       'temperature_2m_mean',
+                                       'rain_sum',
+                                       'wind_speed_10m_max',
+                                       'shortwave_radiation_sum']]
+    print(daily_dataframe)
+    daily_dataframe.rename(columns={'date': 'date_id'}, inplace=True)
 
-    # db_url = "postgresql://postgres:mysecretpassword@localhost:5433/postgres"
+    save_to_postgres(daily_dataframe, db_url, table_name='daily_weather_data',
+                     unique_columns=['country_name', 'date_id'])
 
-    # hourly_air = fetcher.fetch(
-    #     latitude=47.50241297012739,
-    #     longitude=19.04873812789789,
-    #     start_date="2024-06-03",
-    #     end_date="2024-11-17",
-    # )
-    # processor = WeatherDataProcessor(response=hourly_air)
-
-    # air_dataframe = processor.process()
-    # air_dataframe['country_name'] = country
-    # air_dataframe = air_dataframe[['country_name',
-    #                                'date',
-    #                                'pm10',
-    #                                'pm2_5',
-    #                                'carbon_dioxide',
-    #                                'nitrogen_dioxide',
-    #                                'sulphur_dioxide',
-    #                                'ozone']]
-    # print(air_dataframe)
-
-    # save_to_postgres(air_dataframe, db_url, table_name='air_quality_data')
-
-    db_url = "postgresql://postgres:mysecretpassword@localhost:5433/postgres"
-
-    hourly_air = fetcher.fetch_forecast_weather_data(
+    # Air quality
+    hourly_air = fetcher.fetch_air_quality_data(
         latitude=47.50241297012739,
         longitude=19.04873812789789,
         start_date="2024-06-03",
@@ -274,14 +255,42 @@ if __name__ == "__main__":
     )
     processor = WeatherDataProcessor(response=hourly_air)
 
-    air_dataframe = processor.process_forecast_weather_data()
+    air_dataframe = processor.process_air_quality_data()
     air_dataframe['country_name'] = country
     air_dataframe = air_dataframe[['country_name',
                                    'date',
-                                   "temperature_2m",
-                                   "rain",
-                                   "wind_speed_10m",
-                                   "shortwave_radiation"]]
+                                   'pm10',
+                                   'pm2_5',
+                                   'carbon_dioxide',
+                                   'nitrogen_dioxide',
+                                   'sulphur_dioxide',
+                                   'ozone']]
+    air_dataframe.rename(columns={'date': 'date_id'}, inplace=True)
+
     print(air_dataframe)
 
-    save_to_postgres(air_dataframe, db_url, table_name='forecast_weather_data')
+    save_to_postgres(air_dataframe, db_url, table_name='air_quality_data',
+                     unique_columns=['country_name', 'date_id'])
+
+    # Forecast
+    hourly_fc = fetcher.fetch_forecast_weather_data(
+        latitude=47.50241297012739,
+        longitude=19.04873812789789,
+        start_date="2024-11-03",
+        end_date="2024-11-17",
+    )
+    processor = WeatherDataProcessor(response=hourly_fc)
+
+    fc_dataframe = processor.process_forecast_weather_data()
+    fc_dataframe['country_name'] = country
+    fc_dataframe = fc_dataframe[['country_name',
+                                 'date',
+                                 "temperature_2m",
+                                 "rain",
+                                 "wind_speed_10m",
+                                 "shortwave_radiation"]]
+    fc_dataframe.rename(columns={'date': 'date_id'}, inplace=True)
+    print(fc_dataframe)
+
+    save_to_postgres(fc_dataframe, db_url, table_name='forecast_weather_data',
+                     unique_columns=['country_name', 'date_id'])

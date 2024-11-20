@@ -7,7 +7,7 @@ def read_weather_data(connection_url, country_name):
     engine = create_engine(connection_url)
 
     query = f"""
-        select a.country_name, a.date, t.*
+        select a.country_name, a.date_id, t.*
         from daily_weather_data as a
         cross join lateral (
         values (a.temperature_2m_mean, 'tempreture_2m_mean'),
@@ -27,7 +27,7 @@ def read_air_pollution_data(connection_url, country_name):
     engine = create_engine(connection_url)
 
     query = f"""
-       select a.country_name, a.date, t.*
+       select a.country_name, a.date_id, t.*
         from air_quality_data as a
         cross join lateral
         (
@@ -53,3 +53,17 @@ def get_unique_countries(db_url):
     df = pd.read_sql(query, engine)
 
     return df['country_name'].values
+
+
+def get_unique_place_names(db_url):
+    engine = create_engine(db_url)
+    query = f"SELECT DISTINCT place_name FROM places_data"
+    df = pd.read_sql(query, engine)
+    return df['place_name'].values
+
+
+def get_coordinates_for_place_name(db_url, place_name):
+    engine = create_engine(db_url)
+    query = f"SELECT latitude, longitude FROM places_data WHERE place_name = '{place_name}'"
+    df = pd.read_sql(query, engine)
+    return df

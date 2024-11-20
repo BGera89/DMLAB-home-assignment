@@ -9,8 +9,8 @@ import os
 app = FastAPI()
 
 # Database configuration
-# os.environ['DB_URL']
-DB_URL = 'postgresql://postgres:mysecretpassword@postgres:5432/postgres'
+#
+DB_URL = os.environ['DB_URL']
 TABLE_NAME = "daily_weather_data"
 
 
@@ -18,6 +18,7 @@ TABLE_NAME = "daily_weather_data"
 async def fetch_and_save_weather(
     lat: float = Query(...),
     lon: float = Query(...),
+    country_name: str = Query(...),
     start_date: str = Query(default="2024-06-03"),
     end_date: str = Query(default="2024-11-17"),
     timezone: str = Query(default="Europe/Berlin")
@@ -40,20 +41,21 @@ async def fetch_and_save_weather(
             longitude=lon,
             start_date=start_date,
             end_date=end_date,
-            timezone=timezone,
+            timezone=timezone
         )
 
         # Process the weather data
         processor = WeatherDataProcessor(response)
         processed_data = processor.process_daily_data()
 
-        processed_data['country_name'] = 'TEST'
+        processed_data['country_name'] = country_name
         processed_data = processed_data[['country_name',
                                          'date',
                                          'temperature_2m_mean',
                                          'rain_sum',
                                          'wind_speed_10m_max',
                                          'shortwave_radiation_sum']]
+        processed_data.rename(columns={'date': 'date_id'}, inplace=True)
 
         # Save to the PostgreSQL database
         save_to_postgres(processed_data, DB_URL, TABLE_NAME)
