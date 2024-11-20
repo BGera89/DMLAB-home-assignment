@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:latest
+    container_name: some-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  db-initalize:
+    build: ./DB
+    container_name: db-initializer
+    depends_on:
+      - postgres
+    environment:
+      - DB_URL=postgresql://postgres:mysecretpassword@postgres:5433/postgres
+
+  ui:
+    build: ./UI  # This assumes your Dash app and Dockerfile are in the ./UI directory
+    container_name: dash-ui
+    depends_on:
+      - postgres
+    ports:
+      - "8050:8050"
+    environment:
+      - DB_URL=postgresql://postgres:mysecretpassword@postgres:5432/postgres
+
+volumes:
+  postgres_data:  # This defines the named volume 'postgres_data'
+    driver: local
