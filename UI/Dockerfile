@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 8050
 
 # Command to run the Dash app
-CMD ["python", "index.py"]
+CMD ["python", "app.py"]

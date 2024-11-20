@@ -3,7 +3,7 @@ import openmeteo_requests
 import requests_cache
 import pandas as pd
 from retry_requests import retry
-from data_write import save_to_postgres
+from data_access.data_write import save_to_postgres
 
 
 class WeatherDataFetcher:
@@ -81,7 +81,7 @@ class WeatherDataFetcher:
         :return: Response object from the API.
         """
 
-        url = "https://archive-api.open-meteo.com/v1/archive"
+        url = "https://api.open-meteo.com/v1/forecast"
         params = {
             "latitude": latitude,
             "longitude": longitude,
@@ -218,6 +218,7 @@ class WeatherDataProcessor:
 
 
 if __name__ == "__main__":
+    # Testing and Initialization purposes
     fetcher = WeatherDataFetcher()
 
     country = 'Budapest'
