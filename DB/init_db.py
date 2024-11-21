@@ -79,11 +79,23 @@ def initialize_database(db_url):
 
 
 def dms_to_dd(dms):
+    """
+    Converts degree minute second (dms) to decimal degree (dd).
+
+    :param dms: degree minute second in a string format.
+    """
     degrees, minutes = map(float, dms.split(':'))
     return degrees + (minutes / 60)
 
 
-def load_places_to_db(excel_path, db_url, table_name):
+def load_places_to_db(excel_path: str, db_url: str, table_name: str):
+    """
+    Loads the Hungarian places into the PostgreSQL database
+
+    :param excel_path: path to excel file
+    :param db_url: Database connection URL.
+    :param table_name: Database table name.
+    """
     # Read Excel file
     df = pd.read_excel(excel_path, usecols=[
                        'Helységnév', 'Keleti hosszúság, fok:perc.századperc', 'Északi szélesség, fok:perc.századperc'])

@@ -142,7 +142,7 @@ class WeatherDataProcessor:
         self.response = response
         self.place_name = place_name
 
-    def process_daily_data(self):
+    def process_daily_data(self) -> pd.DataFrame:
         """
         Process daily weather data from the API response.
         :return: Pandas DataFrame of daily weather data.
@@ -179,7 +179,7 @@ class WeatherDataProcessor:
 
         return daily_dataframe
 
-    def process_forecast_weather_data(self):
+    def process_forecast_weather_data(self) -> pd.DataFrame:
         """
         Process daily weather data from the API response.
         :return: Pandas DataFrame of daily weather data.
@@ -214,7 +214,7 @@ class WeatherDataProcessor:
                                                  ]]
         return forecast_dataframe
 
-    def process_air_quality_data(self):
+    def process_air_quality_data(self) -> pd.DataFrame:
         hourly_variables = [
             "pm10", "pm2_5", "carbon_dioxide",
             "nitrogen_dioxide", "sulphur_dioxide",
