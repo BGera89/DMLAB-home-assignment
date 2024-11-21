@@ -6,6 +6,7 @@ from api_fetcher import WeatherDataProcessor
 from data_access.data_write import save_to_postgres
 from utility import fetch_and_process_multiple
 import os
+import datetime
 
 app = FastAPI()
 
@@ -13,6 +14,9 @@ app = FastAPI()
 #
 DB_URL = os.environ['DB_URL']
 TABLE_NAME = "daily_weather_data"
+today = datetime.date.today().strftime("%Y-%m-%d")
+
+future_date = (today + datetime.timedelta(days=7)).strftime("%Y-%m-%d")
 
 
 @app.get("/weather")
@@ -21,7 +25,7 @@ async def fetch_and_save_weather(
     lon: float = Query(...),
     place_name: str = Query(...),
     start_date: str = Query(default="2024-06-03"),
-    end_date: str = Query(default="2024-11-17"),
+    end_date: str = Query(default=future_date),
     timezone: str = Query(default="Europe/Berlin")
 ):
     """
@@ -36,17 +40,18 @@ async def fetch_and_save_weather(
 
         fetch_process_pairs = [
             ("fetch_daily_weather_data", "process_daily_data",
-             'daily_weather_data'),
+             'daily_weather_data', "2024-06-03", today),
             ("fetch_air_quality_data", "process_air_quality_data",
-             'air_quality_data'),
-            ("fetch_forecast_weather_data",
-             "process_forecast_weather_data", 'forecast_weather_data'),
+             'air_quality_data', "2024-06-03", today),
+            ("fetch_forecast_weather_data", "process_forecast_weather_data",
+             'forecast_weather_data', today, future_date),
         ]
         # Instantiate the WeatherDataFetcher
         fetcher = WeatherDataFetcher()
         processor_class = WeatherDataProcessor
 
-        for fetch_method, process_method, table_name in fetch_process_pairs:
+        for fetch_method, process_method, \
+                table_name, start_timestamp, end_timestamp in fetch_process_pairs:
             fetch_and_process_multiple(
                 fetcher=fetcher,
                 processor_class=processor_class,
@@ -54,8 +59,8 @@ async def fetch_and_save_weather(
                 process_method=process_method,
                 latitude=lat,
                 longitude=lon,
-                start_date=start_date,
-                end_date=end_date,
+                start_date=start_timestamp,
+                end_date=end_timestamp,
                 timezone=timezone,
                 place_name=place_name,
                 db_url=os.environ['DB_URL'], table_name=table_name)

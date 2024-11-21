@@ -22,7 +22,7 @@ def X_save_to_postgres(dataframe, db_url, table_name):
         print(f"Error saving data to PostgreSQL: {e}")
 
 
-def data_exists(engine, table_name, dataframe, unique_columns=['place_name', 'date_id']):
+def data_exists(engine, table_name, dataframe, unique_columns=['place_name', 'date_id']) -> pd.DataFrame:
     """
     Check if data already exists in the database.
     :param engine: SQLAlchemy engine object.

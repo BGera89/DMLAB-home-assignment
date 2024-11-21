@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
 import pandas as pd
-from ..api_fetcher import WeatherDataFetcher, WeatherDataProcessor
+from api_fetcher import WeatherDataFetcher, WeatherDataProcessor
 
 
 class TestWeatherDataFetcher(unittest.TestCase):
@@ -10,7 +10,7 @@ class TestWeatherDataFetcher(unittest.TestCase):
     """
 
     # Mock the API client
-    @patch('weather_data_fetcher.openmeteo_requests.Client')
+    @patch('openmeteo_requests.Client')
     def test_fetch_daily_weather_data(self, MockClient):
         """
         Test the fetch_daily_weather_data method of WeatherDataFetcher.
@@ -57,31 +57,36 @@ class TestWeatherDataProcessor(unittest.TestCase):
         mock_response = MagicMock()
         mock_daily = MagicMock()
         mock_daily.Variables.return_value.ValuesAsNumpy.side_effect = [
-            [15.0, 16.0, 17.0],  # temperature_2m_mean
-            [0.0, 0.1, 0.2],     # rain_sum
-            [3.0, 4.0, 5.0],     # wind_speed_10m_max
-            [100.0, 200.0, 300.0]  # shortwave_radiation_sum
+            [15.0, 16.0],  # temperature_2m_mean
+            [0.0, 0.1],     # rain_sum
+            [3.0, 4.0],     # wind_speed_10m_max
+            [100.0, 200.0]  # shortwave_radiation_sum
         ]
         mock_response.Daily.return_value = mock_daily
-        mock_daily.Time.return_value = [
-            1690000000, 1690003600, 1690007200]  # Mock timestamps
-        mock_daily.TimeEnd.return_value = [1690007200]  # Mock end timestamps
+        mock_daily.Time.return_value = 1690000000  # Mock timestamps
+        mock_daily.TimeEnd.return_value = 1690007200  # Mock end timestamps
         mock_daily.Interval.return_value = 3600
 
         processor = WeatherDataProcessor(
             response=mock_response, place_name="Berlin")
 
+        print(mock_response)
         # Act
         result = processor.process_daily_data()
 
         # Assert
         expected_data = {
-            "place_name": ["Berlin", "Berlin", "Berlin"],
-            "date_id": pd.to_datetime([1690000000, 1690003600, 1690007200], unit="s", utc=True),
-            "temperature_2m_mean": [15.0, 16.0, 17.0],
-            "rain_sum": [0.0, 0.1, 0.2],
-            "wind_speed_10m_max": [3.0, 4.0, 5.0],
-            "shortwave_radiation_sum": [100.0, 200.0, 300.0]
+            "place_name": ["Berlin", "Berlin"],
+            "date_id": pd.date_range(
+                start=pd.to_datetime(1690000000, unit="s", utc=True),
+                end=pd.to_datetime(1690007200, unit="s", utc=True),
+                freq="1H",  # Equivalent to 3600 seconds
+                inclusive="right"
+            ),
+            "temperature_2m_mean": [15.0, 16.0],
+            "rain_sum": [0.0, 0.1],
+            "wind_speed_10m_max": [3.0, 4.0],
+            "shortwave_radiation_sum": [100.0, 200.0]
         }
         expected_df = pd.DataFrame(expected_data)
         pd.testing.assert_frame_equal(result, expected_df)

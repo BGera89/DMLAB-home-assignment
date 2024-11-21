@@ -10,14 +10,27 @@ def read_weather_data(connection_url, place_name):
         select a.place_name, a.date_id, t.*
         from daily_weather_data as a
         cross join lateral (
-        values (a.temperature_2m_mean, 'tempreture_2m_mean'),
-            (a.rain_sum, 'rain_sum'),
-            (a.Wind_speed_10m_max, 'wind_speed_10m_max'),
-            (a.Shortwave_radiation_sum, 'short_wave_radiation_sum')
+        values (a.temperature_2m_mean, 'tempreture_2m_Cels'),
+                (a.rain_sum, 'rain_mm'),
+                (a.Wind_speed_10m_max, 'wind_speed_10m_kmh'),
+                (a.Shortwave_radiation_sum, 'short_wave_radiation_Wm2')
         )
-		as t (Value, measure)
+                as t (Value, measure)
         where a.place_name='{place_name}'
-	order by 1,2
+
+        UNION
+        
+        select a.place_name, a.date_id, t.*
+        from forecast_weather_data as a
+        cross join lateral (
+        values (a.temperature_2m, 'tempreture_2m__Cels'),
+                (a.rain, 'rain_mm'),
+                (a.Wind_speed_10m, 'wind_speed_kmh'),
+                (a.Shortwave_radiation, 'short_wave_radiation_Wm2')
+        )
+                as t (Value, measure)
+        where a.place_name='{place_name}'
+            order by 1,2
     """
     return pd.read_sql(query, engine)
 

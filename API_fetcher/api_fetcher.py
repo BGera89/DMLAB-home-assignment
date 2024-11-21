@@ -130,6 +130,8 @@ class WeatherDataFetcher:
 class WeatherDataProcessor:
     """
     Class that processes the Weather data returned by the WeatherDataFetcher class
+    In the functions variables are defined inside the function 
+    becaouse they are static for database use
     """
 
     def __init__(self, response, place_name):

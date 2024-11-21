@@ -29,7 +29,8 @@ app_layout = html.Div([
         ),
         html.Button("Fetch Weather", id="fetch-weather-btn"),
     ]),
-    html.Div(id="weather-output"),
+    html.Div([], id="weather-output"),
+    html.Div([], style={'height': '50px'})
 ])
 
 
@@ -54,6 +55,7 @@ def refresh_place_dropdown(n_clicks):
 def update_weather_graph(selected_place):
     db_url = os.environ['DB_URL']
     df = db_read.read_weather_data(db_url, place_name=selected_place)
+    df.drop_duplicates(subset=['date_id', 'measure'], inplace=True)
     fig = px.line(
         df,
         x="date_id",
