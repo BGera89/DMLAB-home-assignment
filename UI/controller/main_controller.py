@@ -35,7 +35,7 @@ app_layout = html.Div([
 
 @app.callback(
     Output("place-selector", "options"),
-    [Input("fetch-weather-btn", "n_clicks")]
+    [Input("weather-output", "children")]
 )
 def refresh_place_dropdown(n_clicks):
     # Fetch the latest place names from the database
