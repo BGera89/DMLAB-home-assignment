@@ -1,5 +1,6 @@
 from dash.dependencies import Input, Output, State
 from dash import dcc
+import dash
 import plotly.express as px
 import os
 from data_access import db_read
@@ -11,9 +12,9 @@ import requests
 app_layout = html.Div([
     html.H1("Weather Time Series Data"),
     dcc.Dropdown(
-        id="country-selector",
+        id="place-selector",
         options=[],  # Will be dynamically populated
-        placeholder="Select a country",
+        placeholder="Select a place",
     ),
     dcc.Graph(id="time-series-plot"),
     dcc.Graph(id='air-pollution-plot'),
@@ -23,7 +24,8 @@ app_layout = html.Div([
             id="place-name-selector",
             options=[],  # Will be dynamically populated
             placeholder="Select a place",
-            searchable=True,  # Allow the user to type and search
+            searchable=True,
+            value=None  # Allow the user to type and search
         ),
         html.Button("Fetch Weather", id="fetch-weather-btn"),
     ]),
@@ -31,49 +33,53 @@ app_layout = html.Div([
 ])
 
 
-@ app.callback(
-    Output("country-selector", "options"),
-    Input("country-selector", "value")
+@app.callback(
+    Output("place-selector", "options"),
+    [Input("fetch-weather-btn", "n_clicks")]
 )
-def populate_country_dropdown(_):
+def refresh_place_dropdown(n_clicks):
+    # Fetch the latest place names from the database
     db_url = os.environ['DB_URL']
-    # Fetch unique country names from the database
-    country_names = db_read.get_unique_countries(db_url)
-    return [{"label": country, "value": country} for country in country_names]
+    place_names = db_read.get_unique_countries(db_url)
+    place_names = db_read.get_unique_countries(db_url)
+    # Return updated dropdown options
+    return [{"label": place, "value": place} for place in place_names]
 
 
 @ app.callback(
     Output("time-series-plot", "figure"),
-    Input("country-selector", "value")
+    Input("place-selector", "value"),
+    prevent_initial_call=True
 )
-def update_weather_graph(selected_country):
+def update_weather_graph(selected_place):
     db_url = os.environ['DB_URL']
-    df = db_read.read_weather_data(db_url, country_name=selected_country)
+    df = db_read.read_weather_data(db_url, place_name=selected_place)
     fig = px.line(
         df,
         x="date_id",
         y="value",
         color="measure",
-        title=f"Weather Data Over Time for {selected_country}"
+        title=f"Weather Data Over Time for {selected_place}"
     )
     return fig
 
 
 @ app.callback(
     Output("air-pollution-plot", "figure"),
-    Input("country-selector", "value")
+    Input("place-selector", "value"),
+    prevent_initial_call=True
 )
-def update_air_pollution_graph(selected_country):
+def update_air_pollution_graph(selected_place):
     db_url = os.environ['DB_URL']
-    df = db_read.read_air_pollution_data(db_url, country_name=selected_country)
+    df = db_read.read_air_pollution_data(db_url, place_name=selected_place)
     # df.drop_duplicates(
-    #     subset=['country_name', 'date', 'measure'], inplace=True)
+    #     subset=['place_name', 'date', 'measure'], inplace=True)
     fig = px.line(
         df,
         x="date_id",
         y="value",
         color="measure",
-        title=f"Air Pollution Data Over Time for {selected_country}"
+        title=f"Air Pollution Data Over Time for {selected_place}"
     )
     return fig
 
@@ -81,7 +87,7 @@ def update_air_pollution_graph(selected_country):
 @app.callback(
     Output("weather-output", "children"),
     [Input("fetch-weather-btn", "n_clicks")],
-    [State("place-name-selector", "value")]
+    [State("place-name-selector", "value"),]
 )
 def fetch_weather(n_clicks, selected_place_name):
     if not n_clicks:
@@ -90,6 +96,7 @@ def fetch_weather(n_clicks, selected_place_name):
         return "Please select a place."
 
     db_url = os.environ['DB_URL']
+    api_url = os.environ['API_FETCHER_URL'] + '/weather'
     coords = db_read.get_coordinates_for_place_name(
         db_url, selected_place_name)
     if coords.empty:
@@ -101,8 +108,9 @@ def fetch_weather(n_clicks, selected_place_name):
     try:
         # Use the service name defined in docker-compose.yml for inter-container communication
         response = requests.get(
-            f"http://api-fetcher-service:5000/weather?lat={lat}&lon={lon}&country_name={selected_place_name}"
-        )
+            api_url, params={'lat': lat,
+                             'lon': lon,
+                             "place_name": selected_place_name})
         response.raise_for_status()  # Raise an error for bad status codes
         data = response.json()
         return f"Weather Data: {data}"

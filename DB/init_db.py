@@ -14,7 +14,7 @@ def initialize_database(db_url):
     # Define the weather_data table schema
     daily_weather_data = Table(
         'daily_weather_data', metadata,
-        Column('country_name', String),
+        Column('place_name', String),
         Column('date_id', DateTime, nullable=False),
         Column('temperature_2m_mean', Float),
         Column('rain_sum', Float),
@@ -24,7 +24,7 @@ def initialize_database(db_url):
 
     air_quality_data = Table(
         'air_quality_data', metadata,
-        Column('country_name', String),
+        Column('place_name', String),
         Column('date_id', DateTime, nullable=False),
         Column('pm10', Float),
         Column('pm2_5', Float),
@@ -36,7 +36,7 @@ def initialize_database(db_url):
 
     forecast_weather_data = Table(
         'forecast_weather_data', metadata,
-        Column('country_name', String),
+        Column('place_name', String),
         Column('date_id', DateTime, nullable=False),
         Column('temperature_2m', Float),
         Column('rain', Float),

@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from api_fetcher import WeatherDataFetcher  # Import your classes
 from api_fetcher import WeatherDataProcessor
 from data_access.data_write import save_to_postgres
+from utility import fetch_and_process_multiple
 import os
 
 app = FastAPI()
@@ -18,7 +19,7 @@ TABLE_NAME = "daily_weather_data"
 async def fetch_and_save_weather(
     lat: float = Query(...),
     lon: float = Query(...),
-    country_name: str = Query(...),
+    place_name: str = Query(...),
     start_date: str = Query(default="2024-06-03"),
     end_date: str = Query(default="2024-11-17"),
     timezone: str = Query(default="Europe/Berlin")
@@ -32,33 +33,32 @@ async def fetch_and_save_weather(
     - timezone: Timezone for the weather data (default: Europe/Berlin)
     """
     try:
+
+        fetch_process_pairs = [
+            ("fetch_daily_weather_data", "process_daily_data",
+             'daily_weather_data'),
+            ("fetch_air_quality_data", "process_air_quality_data",
+             'air_quality_data'),
+            ("fetch_forecast_weather_data",
+             "process_forecast_weather_data", 'forecast_weather_data'),
+        ]
         # Instantiate the WeatherDataFetcher
         fetcher = WeatherDataFetcher()
+        processor_class = WeatherDataProcessor
 
-        # Fetch the weather data
-        response = fetcher.fetch_daily_weather_data(
-            latitude=lat,
-            longitude=lon,
-            start_date=start_date,
-            end_date=end_date,
-            timezone=timezone
-        )
-
-        # Process the weather data
-        processor = WeatherDataProcessor(response)
-        processed_data = processor.process_daily_data()
-
-        processed_data['country_name'] = country_name
-        processed_data = processed_data[['country_name',
-                                         'date',
-                                         'temperature_2m_mean',
-                                         'rain_sum',
-                                         'wind_speed_10m_max',
-                                         'shortwave_radiation_sum']]
-        processed_data.rename(columns={'date': 'date_id'}, inplace=True)
-
-        # Save to the PostgreSQL database
-        save_to_postgres(processed_data, DB_URL, TABLE_NAME)
+        for fetch_method, process_method, table_name in fetch_process_pairs:
+            fetch_and_process_multiple(
+                fetcher=fetcher,
+                processor_class=processor_class,
+                fetch_method=fetch_method,
+                process_method=process_method,
+                latitude=lat,
+                longitude=lon,
+                start_date=start_date,
+                end_date=end_date,
+                timezone=timezone,
+                place_name=place_name,
+                db_url=os.environ['DB_URL'], table_name=table_name)
 
         return {"message": "Weather data successfully saved to the database."}
     except Exception as e:

@@ -9,7 +9,11 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "env":{
+                "DB_URL": "postgresql://postgres:mysecretpassword@localhost:5433/postgres",
+                "API_FETCHER_URL" : "http://127.0.0.1:5000/"
+            }
         }
     ]
 }
