@@ -147,8 +147,8 @@ class WeatherDataProcessor:
         Process daily weather data from the API response.
         :return: Pandas DataFrame of daily weather data.
         """
-        daily_variables = ["temperature_2m_mean", "rain_sum",
-                           "wind_speed_10m_max", "shortwave_radiation_sum"]
+        daily_variables = ["temperature_2m_cels", "rain_mm",
+                           "wind_speed_kmh"]
 
         daily = self.response.Daily()
         variables = [daily.Variables(i).ValuesAsNumpy()
@@ -172,10 +172,10 @@ class WeatherDataProcessor:
         daily_dataframe['place_name'] = self.place_name
         daily_dataframe = daily_dataframe[['place_name',
                                            'date_id',
-                                           'temperature_2m_mean',
-                                           'rain_sum',
-                                           'wind_speed_10m_max',
-                                           'shortwave_radiation_sum']]
+                                           "temperature_2m_cels",
+                                           "rain_mm",
+                                           "wind_speed_kmh"
+                                           ]]
 
         return daily_dataframe
 
@@ -184,8 +184,8 @@ class WeatherDataProcessor:
         Process daily weather data from the API response.
         :return: Pandas DataFrame of daily weather data.
         """
-        hourly_variables = ["temperature_2m", "rain",
-                            "wind_speed_10m", "shortwave_radiation"]
+        hourly_variables = ["temperature_2m_cels", "rain_mm",
+                            "wind_speed_kmh"]
         hourly = self.response.Hourly()
         variables = [hourly.Variables(i).ValuesAsNumpy()
                      for i in range(len(hourly_variables))]
@@ -208,10 +208,10 @@ class WeatherDataProcessor:
         forecast_dataframe['place_name'] = self.place_name
         forecast_dataframe = forecast_dataframe[['place_name',
                                                  'date_id',
-                                                 "temperature_2m",
-                                                 "rain",
-                                                 "wind_speed_10m",
-                                                 "shortwave_radiation"]]
+                                                 "temperature_2m_cels",
+                                                 "rain_mm",
+                                                 "wind_speed_kmh"
+                                                 ]]
         return forecast_dataframe
 
     def process_air_quality_data(self):

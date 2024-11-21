@@ -20,6 +20,9 @@ today_str = today.strftime("%Y-%m-%d")
 future_date = today + datetime.timedelta(days=7)
 future_date_str = future_date.strftime("%Y-%m-%d")
 
+past_3_days = today - datetime.timedelta(days=3)
+past_3_days_str = past_3_days.strftime("%Y-%m-%d")
+
 
 @app.get("/weather")
 async def fetch_and_save_weather(
@@ -27,7 +30,7 @@ async def fetch_and_save_weather(
     lon: float = Query(...),
     place_name: str = Query(...),
     start_date: str = Query(default="2024-06-03"),
-    end_date: str = Query(default=future_date),
+    end_date: str = Query(default=future_date_str),
     timezone: str = Query(default="Europe/Berlin")
 ):
     """
@@ -42,11 +45,11 @@ async def fetch_and_save_weather(
 
         fetch_process_pairs = [
             ("fetch_daily_weather_data", "process_daily_data",
-             'daily_weather_data', "2024-06-03", today),
+             'daily_weather_data', "2024-06-03", past_3_days_str),
             ("fetch_air_quality_data", "process_air_quality_data",
              'air_quality_data', "2024-06-03", today),
             ("fetch_forecast_weather_data", "process_forecast_weather_data",
-             'forecast_weather_data', today, future_date),
+             'forecast_weather_data', past_3_days_str, future_date),
         ]
         # Instantiate the WeatherDataFetcher
         fetcher = WeatherDataFetcher()

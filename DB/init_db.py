@@ -16,10 +16,9 @@ def initialize_database(db_url):
         'daily_weather_data', metadata,
         Column('place_name', String),
         Column('date_id', DateTime, nullable=False),
-        Column('temperature_2m_mean', Float),
-        Column('rain_sum', Float),
-        Column('wind_speed_10m_max', Float),
-        Column('shortwave_radiation_sum', Float)
+        Column('temperature_2m_cels', Float),
+        Column('rain_mm', Float),
+        Column('wind_speed_kmh', Float)
     )
 
     air_quality_data = Table(
@@ -38,10 +37,9 @@ def initialize_database(db_url):
         'forecast_weather_data', metadata,
         Column('place_name', String),
         Column('date_id', DateTime, nullable=False),
-        Column('temperature_2m', Float),
-        Column('rain', Float),
-        Column('wind_speed_10m', Float),
-        Column('shortwave_radiation', Float)
+        Column('temperature_2m_cels', Float),
+        Column('rain_mm', Float),
+        Column('wind_speed_kmh', Float)
     )
 
     places_data = Table(

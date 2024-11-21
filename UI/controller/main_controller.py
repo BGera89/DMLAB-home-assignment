@@ -2,9 +2,12 @@ from dash.dependencies import Input, Output, State
 from dash import dcc
 import dash
 import plotly.express as px
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 import os
 from data_access import db_read
 import sys
+import dash_bootstrap_components as dbc
 from dash import dcc, html
 from app_init import app
 import requests
@@ -27,7 +30,15 @@ app_layout = html.Div([
             searchable=True,
             value=None  # Allow the user to type and search
         ),
-        html.Button("Fetch Weather", id="fetch-weather-btn"),
+        dbc.Button("Fetch Weather", id="fetch-weather-btn",
+                   style={
+                       'backgroundColor': '#007bff',
+                       'color': 'white',
+                       'padding': '10px 20px',
+                       'border': 'none',
+                       'borderRadius': '5px',
+                       'cursor': 'pointer'
+                   }),
     ]),
     html.Div([], id="weather-output"),
     html.Div([], style={'height': '50px'})
@@ -55,7 +66,6 @@ def refresh_place_dropdown(n_clicks):
 def update_weather_graph(selected_place):
     db_url = os.environ['DB_URL']
     df = db_read.read_weather_data(db_url, place_name=selected_place)
-    df.drop_duplicates(subset=['date_id', 'measure'], inplace=True)
     fig = px.line(
         df,
         x="date_id",
@@ -63,6 +73,25 @@ def update_weather_graph(selected_place):
         color="measure",
         title=f"Weather Data Over Time for {selected_place}"
     )
+    fig.update_layout(
+        plot_bgcolor='white'
+    )
+
+    fig.update_xaxes(
+        mirror=True,
+        ticks='outside',
+        showline=True,
+        linecolor='black',
+        gridcolor='lightgrey'
+    )
+    fig.update_yaxes(
+        mirror=True,
+        ticks='outside',
+        showline=True,
+        linecolor='black',
+        gridcolor='lightgrey'
+    )
+
     return fig
 
 
@@ -74,14 +103,55 @@ def update_weather_graph(selected_place):
 def update_air_pollution_graph(selected_place):
     db_url = os.environ['DB_URL']
     df = db_read.read_air_pollution_data(db_url, place_name=selected_place)
-    # df.drop_duplicates(
-    #     subset=['place_name', 'date', 'measure'], inplace=True)
-    fig = px.line(
-        df,
-        x="date_id",
-        y="value",
-        color="measure",
-        title=f"Air Pollution Data Over Time for {selected_place}"
+
+    # Creating the figure with secondary y-axis
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    # Adding data for each measure
+    for measure in df['measure'].unique():
+        subset = df[df['measure'] == measure]
+        if measure == "carbon_dioxide":
+            fig.add_trace(
+                go.Scatter(
+                    x=subset["date_id"],
+                    y=subset["value"],
+                    name=measure
+                ),
+                secondary_y=True
+            )
+        else:
+            fig.add_trace(
+                go.Scatter(
+                    x=subset["date_id"],
+                    y=subset["value"],
+                    name=measure
+                ),
+                secondary_y=False
+            )
+
+    # Updating layout
+    fig.update_layout(
+        title=f"Air Pollution Data Over Time for {selected_place}",
+        xaxis_title="Date",
+        yaxis_title="Primary Measures (μg\m^3)",
+        yaxis2_title="Carbon Dioxide (ppm)",
+        plot_bgcolor='white'
+
+    )
+
+    fig.update_xaxes(
+        mirror=True,
+        ticks='outside',
+        showline=True,
+        linecolor='black',
+        gridcolor='lightgrey'
+    )
+    fig.update_yaxes(
+        mirror=True,
+        ticks='outside',
+        showline=True,
+        linecolor='black',
+        gridcolor='lightgrey'
     )
     return fig
 

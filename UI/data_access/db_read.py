@@ -7,26 +7,24 @@ def read_weather_data(connection_url, place_name):
     engine = create_engine(connection_url)
 
     query = f"""
-        select a.place_name, a.date_id, t.*
+        select a.place_name, a.date_id, 'past' as data_version, t.*
         from daily_weather_data as a
         cross join lateral (
-        values (a.temperature_2m_mean, 'tempreture_2m_Cels'),
-                (a.rain_sum, 'rain_mm'),
-                (a.Wind_speed_10m_max, 'wind_speed_10m_kmh'),
-                (a.Shortwave_radiation_sum, 'short_wave_radiation_Wm2')
+        values (a.temperature_2m_cels, 'tempreture_2m_Cels'),
+                (a.rain_mm, 'rain_mm'),
+                (a.wind_speed_kmh, 'wind_speed_kmh')
         )
                 as t (Value, measure)
         where a.place_name='{place_name}'
 
         UNION
         
-        select a.place_name, a.date_id, t.*
+        select a.place_name, a.date_id, 'fc' as data_version, t.*
         from forecast_weather_data as a
         cross join lateral (
-        values (a.temperature_2m, 'tempreture_2m__Cels'),
-                (a.rain, 'rain_mm'),
-                (a.Wind_speed_10m, 'wind_speed_kmh'),
-                (a.Shortwave_radiation, 'short_wave_radiation_Wm2')
+        values (a.temperature_2m_cels, 'tempreture_2m_Cels'),
+                (a.rain_mm, 'rain_mm'),
+                (a.wind_speed_kmh, 'wind_speed_kmh')
         )
                 as t (Value, measure)
         where a.place_name='{place_name}'
