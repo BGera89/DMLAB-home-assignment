@@ -27,7 +27,7 @@ services:
       - "8050:8050"
     environment:
       - DB_URL=postgresql://postgres:mysecretpassword@postgres:5432/postgres
-      - http://api-fetcher-service:5000/
+      - API_FETCHER_URL=http://api-fetcher-service:5000/
   api:
     build: ./API_fetcher  # This assumes your API code and Dockerfile are in the ./API directory
     container_name: api-fetcher-service
