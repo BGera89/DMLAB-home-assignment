@@ -1,0 +1,37 @@
+name: Python Unit Tests
+
+on:
+  push:
+    branches:
+      - main  # Run tests when code is pushed to the main branch
+  pull_request:
+    branches:
+      - main  # Run tests for pull requests targeting the main branch
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Check out the code
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: Set up Python
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'  # Use a Python version compatible with your code
+
+    # Step 3: Install dependencies
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt  # Add a requirements.txt if necessary
+        pip install pandas  # Ensure pandas is installed
+        pip install openmeteo_requests  # Replace with actual dependency for `api_fetcher`
+
+    # Step 4: Run tests
+    - name: Run tests
+      run: |
+        python -m unittest discover tests
