@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
 import pandas as pd
-from api_fetcher_api import WeatherDataFetcher, WeatherDataProcessor  # Adjust as needed
+from ..api_fetcher import WeatherDataFetcher, WeatherDataProcessor
 
 
 class TestWeatherDataFetcher(unittest.TestCase):
