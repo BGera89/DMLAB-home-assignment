@@ -14,9 +14,11 @@ app = FastAPI()
 #
 DB_URL = os.environ['DB_URL']
 TABLE_NAME = "daily_weather_data"
-today = datetime.date.today().strftime("%Y-%m-%d")
+today = datetime.date.today()
+today_str = today.strftime("%Y-%m-%d")
 
-future_date = (today + datetime.timedelta(days=7)).strftime("%Y-%m-%d")
+future_date = today + datetime.timedelta(days=7)
+future_date_str = future_date.strftime("%Y-%m-%d")
 
 
 @app.get("/weather")
