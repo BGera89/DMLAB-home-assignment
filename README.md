@@ -117,4 +117,4 @@ If given more time, the following improvements could be implemented:
 ---
 
 If you have any comments reguarding the application weather it's positive or constructive I'm happy to hear it.
-I really enjoyed this small project and thank you for the opputrinity.
+I really enjoyed this small project and thank you for the opportunity.
