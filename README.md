@@ -27,6 +27,8 @@ The application uses a **microservice architecture** with three primary microser
 
 Each microservice is containerized using **Docker**. Each module contains its own `Dockerfile` and `requirements.txt` file. A root directory (`src`) contains the `docker-compose.yml` file to orchestrate all containers. Environment variables are stored in a `.env` file and it's in the repo for the testers convinience (this would not be included in a production environment).
 
+---
+
 ### Database Service
 
 - **Database Structure**:  
