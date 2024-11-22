@@ -13,26 +13,33 @@ def read_weather_data(connection_url, place_name):
     engine = create_engine(connection_url)
 
     query = f"""
-        select a.place_name, a.date_id, 'past' as data_version, t.*
-        from daily_weather_data as a
+        select
+        a.place_name,
+        a.date_id,
+        'past' as data_version,
+        t.*
+        from
+            daily_weather_data as a
         cross join lateral (
-        values (a.temperature_2m_cels, 'tempreture_2m_Cels'),
+        values  (a.temperature_2m_cels, 'tempreture_2m_Cels'),
                 (a.rain_mm, 'rain_mm'),
                 (a.wind_speed_kmh, 'wind_speed_kmh')
-        )
-                as t (Value, measure)
-        where a.place_name='{place_name}'
+                )
+                        as t (Value,
+            measure)
+        where
+            a.place_name = '{place_name}'
 
-        UNION
-        
-        select a.place_name, a.date_id, 'fc' as data_version, t.*
-        from forecast_weather_data as a
-        cross join lateral (
-        values (a.temperature_2m_cels, 'tempreture_2m_Cels'),
-                (a.rain_mm, 'rain_mm'),
-                (a.wind_speed_kmh, 'wind_speed_kmh')
-        )
-                as t (Value, measure)
+                UNION
+                
+                select a.place_name, a.date_id, 'fc' as data_version, t.*
+                from forecast_weather_data as a
+                cross join lateral (
+                values  (a.temperature_2m_cels, 'tempreture_2m_Cels'),
+                        (a.rain_mm, 'rain_mm'),
+                        (a.wind_speed_kmh, 'wind_speed_kmh')
+            )
+                    as t (Value, measure)
         where a.place_name='{place_name}'
             order by 1,2
     """
@@ -51,8 +58,10 @@ def read_air_pollution_data(connection_url, place_name):
     engine = create_engine(connection_url)
 
     query = f"""
-       select a.place_name, a.date_id, t.*
-        from air_quality_data as a
+       select 
+       a.place_name, 
+       a.date_id, t.*
+       from air_quality_data as a
         cross join lateral
         (
         values (a.pm10, 'pm10'),
