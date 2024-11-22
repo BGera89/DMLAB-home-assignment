@@ -7,6 +7,4 @@ src/UI/data_access/__pycache__
 src/API_fetcher/tests/__pycache__
 src/.cache.sqlite
 src/API_fetcher/.cache.sqlite
-
-src/.env
 src/API_fetcher/api_tester.py
