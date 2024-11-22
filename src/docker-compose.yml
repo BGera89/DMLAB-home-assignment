@@ -19,24 +19,27 @@ services:
       - .env
 
   ui:
-    build: ./UI  # This assumes your Dash app and Dockerfile are in the ./UI directory
+    build: ./UI
     container_name: dash-ui
     depends_on:
       - postgres
+      - db-initalize
+      - api
     ports:
       - "8050:8050"
     env_file:
       - .env
   api:
-    build: ./API_fetcher  # This assumes your API code and Dockerfile are in the ./API directory
+    build: ./API_fetcher  
     container_name: api-fetcher-service
     depends_on:
       - postgres
+      - db-initalize
     ports:
       - "5000:5000"
     env_file:
       - .env
 
 volumes:
-  postgres_data:  # This defines the named volume 'postgres_data'
+  postgres_data: 
     driver: local
