@@ -60,7 +60,9 @@ This microservice fetches weather, forecast, and air quality data from Open-Mete
 - **`data_access/data_write.py`**:  
    - Functions for adding data to the database.  
    - Ensures data integrity by preventing duplicate entries.
-
+- **`tests/unit_tests.py`**:  
+   - Added unit test for the first fetcher and processor functions in the two calsses.
+   - There is also a github action so when we push to the main branch the Unittests run
 ---
 
 ### UI Service

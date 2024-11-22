@@ -3,11 +3,14 @@ name: API Fetcher Unit Tests
 on:
   push:
     branches:
-      - main  # Run on pushes to the main branch
+      - main
+    paths:
+      - 'src/API_fetcher/**'  
   pull_request:
     branches:
-      - main  # Run on pull requests targeting the main branch
-
+      - main 
+    paths:
+      - 'src/API_fetcher/**'
 jobs:
   test:
     runs-on: ubuntu-latest
