@@ -3,10 +3,10 @@ from sqlalchemy.exc import OperationalError
 import pandas as pd
 
 
-def initialize_database(db_url):
+def initialize_database(connection_url):
     """
     Ensure the database has the required table schema.
-    :param db_url: Database connection URL.
+    :param connection_url: Database connection URL.
     """
 
     metadata = MetaData()
@@ -51,7 +51,7 @@ def initialize_database(db_url):
 
     try:
         # Create the database engine
-        engine = create_engine(db_url)
+        engine = create_engine(connection_url)
 
         # Use the public API to check if the tables exist
         inspector = inspect(engine)
@@ -88,12 +88,12 @@ def dms_to_dd(dms):
     return degrees + (minutes / 60)
 
 
-def load_places_to_db(excel_path: str, db_url: str, table_name: str):
+def load_places_to_db(excel_path: str, connection_url: str, table_name: str):
     """
     Loads the Hungarian places into the PostgreSQL database
 
     :param excel_path: path to excel file
-    :param db_url: Database connection URL.
+    :param connection_url: Database connection URL.
     :param table_name: Database table name.
     """
     # Read Excel file
@@ -111,7 +111,7 @@ def load_places_to_db(excel_path: str, db_url: str, table_name: str):
     df = df.drop(['longitude_dms', 'latitude_dms'], axis=1)
 
     # Connect to the database
-    engine = create_engine(db_url)
+    engine = create_engine(connection_url)
 
     # Fetch existing data from the database
     existing_data_df = pd.read_sql_table(
@@ -134,8 +134,8 @@ def load_places_to_db(excel_path: str, db_url: str, table_name: str):
 
 
 if __name__ == "__main__":
-    db_url = "postgresql://postgres:mysecretpassword@postgres:5432/postgres"
-    initialize_database(db_url)
+    connection_url = "postgresql://postgres:mysecretpassword@postgres:5432/postgres"
+    initialize_database(connection_url)
     excel_path = 'tables.helyseg_hu.xls'
     table_name = 'places_data'  # Replace with your actual table name
-    load_places_to_db(excel_path, db_url, table_name)
+    load_places_to_db(excel_path, connection_url, table_name)

@@ -2,26 +2,6 @@ from sqlalchemy import create_engine
 import pandas as pd
 
 
-def X_save_to_postgres(dataframe, db_url, table_name):
-    """
-    Save a Pandas DataFrame to a PostgreSQL table.
-    :param dataframe: DataFrame to save.
-    :param db_url: Database URL (SQLAlchemy format).
-    :param table_name: Name of the PostgreSQL table.
-    """
-    try:
-        # Create SQLAlchemy engine
-        engine = create_engine(db_url)
-
-        # Write the DataFrame to the database
-        dataframe.to_sql(table_name, con=engine,
-                         if_exists='append', index=False)
-
-        print(f"Data successfully saved to table '{table_name}'.")
-    except Exception as e:
-        print(f"Error saving data to PostgreSQL: {e}")
-
-
 def data_exists(engine, table_name, dataframe, unique_columns=['place_name', 'date_id']) -> pd.DataFrame:
     """
     Check if data already exists in the database.
@@ -46,15 +26,15 @@ def data_exists(engine, table_name, dataframe, unique_columns=['place_name', 'da
         return new_data
 
 
-def save_to_postgres(dataframe, db_url, table_name, unique_columns=['place_name', 'date_id']):
+def save_to_postgres(dataframe, connection_url, table_name, unique_columns=['place_name', 'date_id']):
     """
     Save a Pandas DataFrame to a PostgreSQL table with a check for duplicates.
     :param dataframe: DataFrame to save.
-    :param db_url: Database URL (SQLAlchemy format).
+    :param connection_url: Database URL (SQLAlchemy format).
     :param table_name: Name of the PostgreSQL table.
     :param unique_columns: List of column names to check for duplicates.
     """
-    engine = create_engine(db_url)
+    engine = create_engine(connection_url)
 
     # If table exists, check for duplicates based on unique columns
     new_data = data_exists(

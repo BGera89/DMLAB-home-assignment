@@ -3,7 +3,13 @@ from sqlalchemy import create_engine
 
 
 def read_weather_data(connection_url, place_name):
+    """
+    Reads historical and forecast weather data from the PostgreSQL db.
 
+    :param connection_url: Database URL (SQLAlchemy format).
+    :param place_name: Name of the citry/villige we want to query.
+    :return: Pandas dataframe with the results.
+    """
     engine = create_engine(connection_url)
 
     query = f"""
@@ -34,6 +40,13 @@ def read_weather_data(connection_url, place_name):
 
 
 def read_air_pollution_data(connection_url, place_name):
+    """
+    Reads air_pollution data from the PostgreSQL db.
+
+    :param connection_url: Database URL (SQLAlchemy format).
+    :param place_name: Name of the citry/villige we want to query.
+    :return: Pandas dataframe with the results.
+    """
 
     engine = create_engine(connection_url)
 
@@ -55,26 +68,49 @@ def read_air_pollution_data(connection_url, place_name):
     return pd.read_sql(query, engine)
 
 
-def get_unique_countries(db_url):
+def get_unique_place_names_with_data(connection_url):
     """
-    Fetch the list of unique place names from the database.
+    Reads unique place_names from the db which already has data with it.
+
+    :param connection_url: Database URL (SQLAlchemy format).
+    :return: Pandas dataframe with the results.
     """
-    engine = create_engine(db_url)
-    query = "SELECT DISTINCT place_name FROM daily_weather_data"
+
+    engine = create_engine(connection_url)
+    query = """SELECT DISTINCT place_name FROM daily_weather_data
+                ORDER BY place_name"""
     df = pd.read_sql(query, engine)
 
     return df['place_name'].values
 
 
-def get_unique_place_names(db_url):
-    engine = create_engine(db_url)
-    query = f"SELECT DISTINCT place_name FROM places_data"
+def get_unique_place_names(connection_url):
+    """
+    Reads unique place_names from the db.
+
+    :param connection_url: Database URL (SQLAlchemy format).
+    :return: Pandas dataframe with the results.
+    """
+
+    engine = create_engine(connection_url)
+    query = """SELECT DISTINCT place_name FROM places_data
+                    ORDER BY place_name"""
+
     df = pd.read_sql(query, engine)
+
     return df['place_name'].values
 
 
-def get_coordinates_for_place_name(db_url, place_name):
-    engine = create_engine(db_url)
+def get_coordinates_for_place_name(connection_url, place_name):
+    """
+    Reads coordinates for a selected place_name
+
+    :param connection_url: Database URL (SQLAlchemy format).
+    :param place_name: Name of the citry/villige we want to query.
+    :return: Pandas dataframe with the results.
+    """
+
+    engine = create_engine(connection_url)
     query = f"SELECT latitude, longitude FROM places_data WHERE place_name = '{place_name}'"
-    df = pd.read_sql(query, engine)
-    return df
+
+    return pd.read_sql(query, engine)

@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 5000
 
 # Command to run the FastAPI app
-CMD ["uvicorn", "api_fetcher_api:app", "--host", "0.0.0.0", "--port", "5000"]
+CMD ["sh", "-c", "python init_db.py && uvicorn api_fetcher_api:app --host 0.0.0.0 --port 5000"]

@@ -5,7 +5,7 @@ def fetch_and_process_multiple(fetcher: object, processor_class: object,
                                fetch_method: str, process_method: str,
                                latitude: float, longitude: float, start_date: str,
                                end_date: str, timezone: str, place_name: str,
-                               db_url: str, table_name: str):
+                               connection_url: str, table_name: str):
     """
     Fetches data from a specified source, processes it, and saves the processed data to a PostgreSQL database.
 
@@ -23,7 +23,7 @@ def fetch_and_process_multiple(fetcher: object, processor_class: object,
         end_date (str): The end date for the data fetch in ISO format (e.g., "2024-01-31").
         timezone (str): The timezone of the location (e.g., "UTC").
         place_name (str): A human-readable name for the location (e.g., "New York").
-        db_url (str): The database connection URL for saving the processed data.
+        connection_url (str): The database connection URL for saving the processed data.
         table_name (str): The name of the table in the database where the data will be stored.
 
     Returns:
@@ -44,7 +44,7 @@ def fetch_and_process_multiple(fetcher: object, processor_class: object,
         # Process data using the specified method
         processor = processor_class(response=response, place_name=place_name)
         processed_data = getattr(processor, process_method)()
-        save_to_postgres(processed_data, db_url, table_name)
+        save_to_postgres(processed_data, connection_url, table_name)
         return
     except Exception as e:
         print(f"An error occurred: {e}")

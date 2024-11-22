@@ -1,9 +1,7 @@
 import openmeteo_requests
-import os
 import requests_cache
 import pandas as pd
 from retry_requests import retry
-from data_access.data_write import save_to_postgres
 
 
 class WeatherDataFetcher:
@@ -11,7 +9,8 @@ class WeatherDataFetcher:
     A class to handle API calls to Open-Meteo and process daily weather data.
     """
 
-    def __init__(self, cache_path=".cache", cache_expiry=-1, retries=5, backoff_factor=0.2):
+    def __init__(self, cache_path: str = ".cache",
+                 cache_expiry: int = -1, retries: int = 5, backoff_factor: float = 0.2):
         """
         Initialize the WeatherDataFetcher with caching and retry mechanisms.
         :param cache_path: Path for caching API responses.
@@ -24,7 +23,7 @@ class WeatherDataFetcher:
         self.client = openmeteo_requests.Client(session=self.session)
 
     @staticmethod
-    def _setup_session(cache_path, cache_expiry, retries, backoff_factor):
+    def _setup_session(cache_path: str, cache_expiry: int, retries: int = 5, backoff_factor: float = 0.2):
         """
         Set up a cached and retry-enabled session.
         :param cache_path: Path for caching API responses.
@@ -35,13 +34,13 @@ class WeatherDataFetcher:
         """
         cache_session = requests_cache.CachedSession(
             cache_path, expire_after=cache_expiry)
-        retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
+        retry_session = retry(cache_session, retries, backoff_factor=0.2)
 
         return retry_session
 
-    def fetch_daily_weather_data(self, latitude, longitude,
-                                 start_date, end_date,
-                                 timezone="Europe/Berlin"):
+    def fetch_daily_weather_data(self, latitude: float, longitude: float,
+                                 start_date: str, end_date: str,
+                                 timezone: str = "Europe/Berlin"):
         """
         Fetch weather data for a specific location and time period.
         :param latitude: Latitude of the location.
@@ -66,10 +65,10 @@ class WeatherDataFetcher:
         responses = self.client.weather_api(url, params=params)
         return responses[0]  # Assuming single location response for now
 
-    def fetch_forecast_weather_data(self, latitude, longitude,
-                                    start_date, end_date,
-                                    temporal_resolution='hourly_6',
-                                    timezone="Europe/Berlin"):
+    def fetch_forecast_weather_data(self, latitude: float, longitude: float,
+                                    start_date: str, end_date: str,
+                                    temporal_resolution: str = 'hourly_6',
+                                    timezone: str = "Europe/Berlin"):
         """
         Fetch weather data for a specific location and time period.
         :param latitude: Latitude of the location.
@@ -94,10 +93,10 @@ class WeatherDataFetcher:
         responses = self.client.weather_api(url, params=params)
         return responses[0]  # Assuming single location response for now
 
-    def fetch_air_quality_data(self, latitude, longitude,
-                               start_date, end_date,
-                               temporal_resolution='hourly_6',
-                               timezone="Europe/Berlin"
+    def fetch_air_quality_data(self, latitude: float, longitude: float,
+                               start_date: str, end_date: str,
+                               temporal_resolution: str = 'hourly_6',
+                               timezone: str = "Europe/Berlin"
                                ):
         """
         Fetch weather data for a specific location and time period.
@@ -134,7 +133,7 @@ class WeatherDataProcessor:
     becaouse they are static for database use
     """
 
-    def __init__(self, response, place_name):
+    def __init__(self, response, place_name: str):
         """
         Initialize the processor with the API response.
         :param response: API response object containing weather data.
@@ -249,57 +248,3 @@ class WeatherDataProcessor:
                                            'ozone']]
 
         return air_q_dataframe
-
-
-if __name__ == "__main__":
-    # Testing and Initialization purposes
-    db_url = os.environ['DB_URL']
-    fetcher = WeatherDataFetcher()
-    place_name = 'Budapest'
-
-    # Process histocial weather data
-    daily_weather = fetcher.fetch_daily_weather_data(
-        latitude=47.50241297012739,
-        longitude=19.04873812789789,
-        start_date="2024-06-03",
-        end_date="2024-11-17",)
-    processor = WeatherDataProcessor(
-        response=daily_weather, place_name=place_name)
-
-    daily_dataframe = processor.process_daily_data()
-    print(daily_dataframe)
-    save_to_postgres(daily_dataframe, db_url, table_name='daily_weather_data',
-                     unique_columns=['place_name', 'date_id'])
-
-    # Process Air quality
-    hourly_air = fetcher.fetch_air_quality_data(
-        latitude=47.50241297012739,
-        longitude=19.04873812789789,
-        start_date="2024-06-03",
-        end_date="2024-11-17",
-    )
-    processor = WeatherDataProcessor(
-        response=hourly_air, place_name=place_name)
-
-    air_dataframe = processor.process_air_quality_data()
-
-    print(air_dataframe)
-
-    save_to_postgres(air_dataframe, db_url, table_name='air_quality_data',
-                     unique_columns=['place_name', 'date_id'])
-
-    # Process Forecasts
-    hourly_fc = fetcher.fetch_forecast_weather_data(
-        latitude=47.50241297012739,
-        longitude=19.04873812789789,
-        start_date="2024-11-03",
-        end_date="2024-11-17",
-    )
-    processor = WeatherDataProcessor(response=hourly_fc, place_name=place_name)
-
-    fc_dataframe = processor.process_forecast_weather_data()
-
-    print(fc_dataframe)
-
-    save_to_postgres(fc_dataframe, db_url, table_name='forecast_weather_data',
-                     unique_columns=['place_name', 'date_id'])

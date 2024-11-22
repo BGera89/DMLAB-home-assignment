@@ -18,6 +18,13 @@ app.layout = html.Div([
     [Input('url', 'pathname')]
 )
 def display_page(pathname):
+    """
+    Function to dynamically display the pages if there were multiple
+
+    :param pathname: URL for the page
+    :returns: The correct layout
+    """
+
     if pathname == '/':
         return app_layout  # Example other page
     else:

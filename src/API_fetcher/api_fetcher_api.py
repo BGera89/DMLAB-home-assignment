@@ -11,9 +11,10 @@ import datetime
 app = FastAPI()
 
 # Database configuration
-#
 DB_URL = os.environ['DB_URL']
 TABLE_NAME = "daily_weather_data"
+
+# Seting the time for dynamic DB insertion
 today = datetime.date.today()
 today_str = today.strftime("%Y-%m-%d")
 
@@ -35,11 +36,12 @@ async def fetch_and_save_weather(
 ):
     """
     Fetch, process, and save weather data to the database.
-    - lat: Latitude of the location
-    - lon: Longitude of the location
-    - start_date: Start date for weather data (YYYY-MM-DD)
-    - end_date: End date for weather data (YYYY-MM-DD)
-    - timezone: Timezone for the weather data (default: Europe/Berlin)
+    :param lat: Latitude of the location
+    :param lon: Longitude of the location
+    :param place_name: Name of the location
+    :param start_date: Start date for weather data (YYYY-MM-DD)
+    :param end_date: End date for weather data (YYYY-MM-DD)
+    :param timezone: Timezone for the weather data (default: Europe/Berlin)
     """
     try:
 
@@ -68,7 +70,7 @@ async def fetch_and_save_weather(
                 end_date=end_timestamp,
                 timezone=timezone,
                 place_name=place_name,
-                db_url=os.environ['DB_URL'], table_name=table_name)
+                connection_url=os.environ['DB_URL'], table_name=table_name)
 
         return {"message": "Weather data successfully saved to the database."}
     except Exception as e:

@@ -15,8 +15,8 @@ services:
     container_name: db-initializer
     depends_on:
       - postgres
-    environment:
-      - DB_URL=postgresql://postgres:mysecretpassword@postgres:5433/postgres
+    env_file:
+      - .env
 
   ui:
     build: ./UI  # This assumes your Dash app and Dockerfile are in the ./UI directory
@@ -25,9 +25,8 @@ services:
       - postgres
     ports:
       - "8050:8050"
-    environment:
-      - DB_URL=postgresql://postgres:mysecretpassword@postgres:5432/postgres
-      - API_FETCHER_URL=http://api-fetcher-service:5000/
+    env_file:
+      - .env
   api:
     build: ./API_fetcher  # This assumes your API code and Dockerfile are in the ./API directory
     container_name: api-fetcher-service
@@ -35,8 +34,8 @@ services:
       - postgres
     ports:
       - "5000:5000"
-    environment:
-      - DB_URL=postgresql://postgres:mysecretpassword@postgres:5432/postgres
+    env_file:
+      - .env
 
 volumes:
   postgres_data:  # This defines the named volume 'postgres_data'

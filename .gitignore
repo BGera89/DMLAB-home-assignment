@@ -1,8 +1,10 @@
 .vscode
-API_fetcher/__pycache__
-UI/__pycache__
-UI/controller/__pycache__
-API_fetcher/data_access/__pycache__
-UI/data_access/__pycache__
-API_fetcher/tests/__pycache__
-.cache.sqlite
+src/API_fetcher/__pycache__
+src/UI/__pycache__
+src/UI/controller/__pycache__
+src/API_fetcher/data_access/__pycache__
+src/UI/data_access/__pycache__
+src/API_fetcher/tests/__pycache__
+src/.cache.sqlite
+src/.env
+src/API_fetcher/api_tester.py
