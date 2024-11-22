@@ -115,6 +115,15 @@ If given more time, the following improvements could be implemented:
 3. **Expanded Data Sources**:  
    - Add options for users to query additional datasets or parameters from Open-Meteo.  
    - Enable more granular data filtering and customization options. 
+3. **Schema design in the database**:  
+   - Right now the data just gets stored in the default public db schema. This could be imporved upon with more time. 
+
+---
+
+## Why this project and architecture
+Weather data is interesting and I though I could create something unique by including and displaying air pollution data. It also allowed me to experiment with a lot of elements mentioned for the position (OOP, mircoservice architecture, UI development, containerization). I also found a really good free API without authentication where I could work around it's limiations. I could implement a small microservice communication with FastAPI. In the end I wanted to make something that could actually create some engagement from the users. I did this by providing an opportunity to check data for their city. 
+
+I used the tech stack that I was familiar with (Postgres, Python, Docker and Python-Dash for the UI) so that's why they are written like this. I didn't experience drawbacks from these methods. Maybe the UI could be written in some other popular frontend framework like [Stremlit](https://streamlit.io/) which I always found interesting.
 
 ---
 
